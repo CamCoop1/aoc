@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, hash::Hash};
+use std::collections::HashSet;
 
 use utils::{file_reader, harness::Solve, Result};
 
@@ -37,22 +37,18 @@ impl Point {
 }
 
 #[derive(Clone)]
-struct Grid(HashMap<Point, u32>);
+struct Grid(HashSet<Point>);
 
 impl Default for Grid {
     fn default() -> Self {
-        Self(HashMap::from([(Point::origin(), 1)]))
+        Self(HashSet::from([Point::origin()]))
     }
 }
 
 impl Grid{
-    
-    fn update_grid<'a>(&'a mut self, updater : &'a Point) {
 
-        self.0
-            .entry(updater.clone())
-            .and_modify(|e| *e+=1)
-            .or_insert(1);
+    fn update_grid(&mut self, updater : &Point) {
+        self.0.insert(updater.clone());
     }
 }
 
@@ -105,17 +101,16 @@ impl Solve for D03 {
         let mut controller = Controller::default();
         let input = file_reader::read_lines(path);
 
-        // Loop through inputs line by line 
-        for i in input {
-            
-            for c in i.chars().into_iter() {
-                // parse each char of the string into Points
-                let updater_point = try_map_str_to_point(&c.to_string()).expect("Could not map char to Point");
-                // Move by offset, track current position with a some counter 
-                controller.process_point(updater_point);
-            }   
-        }
-        
+         // Loop through inputs line by line 
+        input.into_iter()
+            .for_each(|i| { 
+                i.chars()// for each String line we want to break it into characters
+                .into_iter()
+                .for_each(|c| { // For each character we map it to a Point and updater our controller
+                    let updater_point = try_map_str_to_point(&c.to_string()).expect("Could not map char to Point");
+                    controller.process_point(updater_point);
+                });                
+            });
 
         controller.calculate_lucky_houses().to_string()
 
@@ -147,8 +142,8 @@ impl Solve for D03 {
         // we minus one lazily here as robo santa and normal santa start at the same house and so 
         // this house needs to not be double counted
         let mut all_houses: HashSet<&Point> = HashSet::new();
-        all_houses.extend(santa_controller.grid.0.keys());
-        all_houses.extend(robo_santa_controller.grid.0.keys());
+        all_houses.extend(santa_controller.grid.0.iter());
+        all_houses.extend(robo_santa_controller.grid.0.iter());
       
         all_houses.len().to_string()
 
