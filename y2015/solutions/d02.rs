@@ -1,13 +1,10 @@
 #![allow(dead_code, non_snake_case, unused)]
 
-use rayon::prelude::*;
 use utils::{file_reader, harness::Solve};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub struct D02;
-
-
 
 struct Rectangle {
     length : u64,
@@ -75,34 +72,35 @@ impl Rectangle {
 impl Solve for D02 {
     fn part1(_: String, path: &String) -> String {
         let input = file_reader::read_lines(path);
-        let mut required_paper : u64 = 0;
+        let mut required_paper : u64 = input
+            .into_iter()
+            .map(|i| {
+                let measurements : Vec<&str> = i.split("x").collect(); // Split into measurements
+                let rectangle = Rectangle::try_from( 
+                [measurements[0], measurements[1],measurements[2]] // Attempt creating our Rectangle
+                    ).expect("Could not parse measurements into Rectangle struct");
 
-        for i in &input {
-            let measurements : Vec<&str> = i.split("x").collect();
-            let rectangle = Rectangle::try_from(
-                [measurements[0], measurements[1],measurements[2]]
-            ).expect("Could not parse measurements into Rectangle struct");
+                rectangle.required_wrapping_paper() // Calculate required wrapping paper
 
-            required_paper += rectangle.required_wrapping_paper();
-        }
+            })
+            .sum();
 
         required_paper.to_string()
     }
 
     fn part2(_: String, path: &String) -> String {
         let input = file_reader::read_lines(path);
-        let mut required_ribbon : u64 = 0;
-
-        required_ribbon += input.into_iter()
-            .map(|i| {
-                let measurements : Vec<&str> = i.split("x").collect();
-                let rectangle = Rectangle::try_from(
-                [measurements[0], measurements[1],measurements[2]]
+        let mut required_ribbon : u64 = input
+            .into_iter() // Turn into iterator
+            .map(|i| { // Map over each element of input
+                let measurements : Vec<&str> = i.split("x").collect(); // Split into measurements
+                let rectangle = Rectangle::try_from( 
+                [measurements[0], measurements[1],measurements[2]] // Attempt creating our Rectangle
                 ).expect("Could not parse measurements into Rectangle struct");
 
-                rectangle.required_ribbon()
+                rectangle.required_ribbon() // Return the required ribbon
             })
-            .sum::<u64>();
+            .sum();
 
         required_ribbon.to_string()
     }
