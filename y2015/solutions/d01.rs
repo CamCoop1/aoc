@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use utils::{file_reader, harness::Solve};
 
 pub struct D01;
@@ -32,7 +30,7 @@ impl Solve for D01 {
     fn part2(_: String, path: &String) -> String {
         let input = file_reader::read_lines(path);
         let mut counter : i16 = 0;
-        
+
         for i in &input {
             for (position, character) in i.chars().into_iter().enumerate() {
                 let mapped_position = position + 1;
