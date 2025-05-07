@@ -1,11 +1,10 @@
-use rayon::prelude::*;
-use utils::{file_reader, harness::Solve, Result};
+use utils::{file_reader, harness::Solve};
 use md5;
 
 pub struct D04;
 
 impl Solve for D04 {
-    fn part1(input: String, path: &String) -> String {
+    fn part1(_: String, path: &String) -> String {
         let input = file_reader::read_lines(path);
         let mut counter: i32 = 0;
         for i in input {
@@ -24,7 +23,7 @@ impl Solve for D04 {
         counter.to_string()
     }
 
-    fn part2(input: String, path: &String) -> String {
+    fn part2(_: String, path: &String) -> String {
         let input = file_reader::read_lines(path);
         let mut counter: i64 = 0;
         for i in input {
