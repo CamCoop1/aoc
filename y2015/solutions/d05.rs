@@ -1,55 +1,17 @@
 #![allow(dead_code, unused, non_snake_case)]
-
+use rayon::prelude::*;
 use utils::{Result, file_reader, harness::Solve};
 use itertools::Itertools;
 
 const VOWELS : [char;5] = ['a', 'e', 'i', 'o', 'u'];
 const DISALLOWED : [&str; 4] = ["ab", "cd", "pq", "xy"];
 
-
+// Part 1 Functional Solutions
 fn check_for_double_letters(input : &str) -> bool {
     input
         .chars()
         .tuple_windows::<(_,_)>() // Take a two element window and check if each char is the same
         .any(|(a,b)| a==b)
-}
-
-// Need a function that will check if any pairs of two letters appear twice without overlap
-// e.g xyxy but not aaa
-fn has_repeated_pair(input: &str) -> bool {
-    let windowed_pairs = input.chars().tuple_windows::<(_, _)>();
-
-    for (i, (a, b)) in windowed_pairs.enumerate() {
-        let window = format!("{}{}", a, b);
-
-        // Collect non-overlapping 2-char chunks (e.g. "xyxy" -> ["xy", "xy"])
-        let chunks: Vec<_> = input
-            .chars()
-            .chunks(2)
-            .into_iter()
-            .map(|mut ch| {
-                let first = ch.next().unwrap_or('\0');
-                let second = ch.next().unwrap_or('\0');
-                format!("{}{}", first, second)
-            })
-            .collect();
-
-        // Count how many times the window appears in the non-overlapping chunks
-        let count = chunks.iter().filter(|c| *c == &window).count();
-
-        if count > 1 {
-            return true;
-        }
-    }
-
-    false
-}
-
-fn check_repeat_letter_with_buffer_element(input : &str) -> bool {
-    input
-        .chars()
-        .tuple_windows::<(_,_,_)>()
-        .any(|(a, b, c)|a==c && (a!=b && c!=b))
 }
 
 fn process_input_for_nice_string_part1(input : &str) -> bool {
@@ -74,10 +36,50 @@ fn process_input_for_nice_string_part1(input : &str) -> bool {
     return check_vowels && check_double_letters;
 }
 
+// Part 2 Functional Solutions
+/// Checking if a repeated pair exists
+/// 
+/// qjhvhtzxzqqjkmpb is nice because is has a pair that appears twice (qj) and a letter that repeats with exactly one letter between them (zxz).
+/// 
+fn check_for_repeated_pair(input: &str) -> bool {
+    // Create a vector if windowed pairs
+    let windowed_pairs: Vec<(char,char)> = input.chars().tuple_windows::<(_, _)>().collect();
+
+    // Iterate through each pair
+    for (i, pair) in windowed_pairs.iter().enumerate() {
+        // Create a cloned vector of pairs that we will use for comparison
+        let mut other_pairs = windowed_pairs.clone();
+        // Remove in reverse order to not shift indices
+        // Removing the next windowed pair as to not include overlaps
+        if i + 1 < other_pairs.len() {
+                other_pairs.remove(i + 1);
+        }
+        other_pairs.remove(i); // always safe, i < len
+        // If not the first pair, remove the n-1 pair as to not include overlaps
+        if i > 0 {
+            other_pairs.remove(i - 1);
+        }
+
+        if other_pairs.contains(pair) {
+            return true;
+        }
+    }
+    false
+}
+/// Check for a repeated letter with one element buffer 
+/// 
+/// xxyxx is nice because it has a pair that appears twice and a letter that repeats with one between, even though the letters used by each rule overlap.
+fn check_repeat_letter_with_buffer_element(input : &str) -> bool {
+
+    input
+        .chars()
+        .tuple_windows::<(_,_,_)>()
+        .any(|(a, b, c)|a==c && (a!=b && c!=b))
+}
+
 fn process_input_for_nice_string_part2(input : &str) -> bool {
     let check_repeat_with_buffer = check_repeat_letter_with_buffer_element(&input);
-    let check_repeated_pair = has_repeated_pair(&input);
-
+    let check_repeated_pair = check_for_repeated_pair(&input);
     return check_repeat_with_buffer && check_repeated_pair
 }
 
