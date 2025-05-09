@@ -1,11 +1,11 @@
 use std::collections::HashSet;
-
+use std::hash::Hash;
 use utils::{file_reader, harness::Solve, Result};
 
-#[derive(Clone, PartialEq, Hash, Eq)]
-struct Point {
-    x : i64,
-    y : i64
+#[derive(Clone, Eq, Copy, PartialEq, Hash)]
+pub struct Point {
+    pub x : i64,
+    pub y : i64
 }
 
 impl Default for Point {
@@ -23,7 +23,7 @@ impl Point {
         }
     }
     
-    fn new(x_val: i64,y_val: i64) -> Self {
+    pub fn new(x_val: i64,y_val: i64) -> Self {
         Self{
             x: x_val,
             y:y_val
