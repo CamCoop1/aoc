@@ -141,6 +141,7 @@ fn parse_input_string_to_light_for_brightness(input:&str, global_hashset : &mut 
     }
 }
 
+/// Helper function to
 fn calculate_start_and_end_lights(input : &str, indecies : [usize;2]) -> Result<(Point, Point)>{
     let input_list: Vec<&str> = input.split_whitespace().collect();
     let light1 : Point = input_list[indecies[0]]
